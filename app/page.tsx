@@ -4,8 +4,9 @@ import { useState } from "react";
 
 export default function Home() {
   const [url, setUrl] = useState<string>("");
-  const [message, setMessage] = useState<string>("hello");
-  const [confidence, setConfidence] = useState<number | null>(85.78);
+  const [message, setMessage] = useState<string>("");
+  const [confidence, setConfidence] = useState<number | null>(null);
+  const [model, setModel] = useState<string>("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -15,13 +16,18 @@ export default function Home() {
       return;
     }
 
+    if(model == ""){
+      alert("No model selected. Please select a model.");
+      return;
+    }
+
     try {
       const response = await fetch("http://127.0.0.1:5000/predict", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url, model }),
       });
 
       const data = await response.json();
@@ -74,6 +80,22 @@ export default function Home() {
         />
         <button
           type="submit"
+          onClick = {() => setModel("cnn")}
+          style={{
+            padding: "10px 20px",
+            backgroundColor: "#0070f3",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+            marginBottom: "10px",
+          }}
+        >
+          CNN Model
+        </button>
+        <button
+          type="submit"
+          onClick = {() => setModel("lstm")}
           style={{
             padding: "10px 20px",
             backgroundColor: "#0070f3",
@@ -83,7 +105,7 @@ export default function Home() {
             cursor: "pointer",
           }}
         >
-          Submit
+          LSTM Model
         </button>
       </form>
 
