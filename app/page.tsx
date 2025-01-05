@@ -10,6 +10,9 @@ export default function Home() {
   const [confidence, setConfidence] = useState<number | null>(null);
   const [model, setModel] = useState<string>("");
 
+  const URL = "https://fake-news-predictor-backend-1.onrender.com/";
+  // const URL = "http://127.0.0.1:5000";
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -24,7 +27,7 @@ export default function Home() {
     }
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/predict", {
+      const response = await fetch(`${URL}/predict`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
