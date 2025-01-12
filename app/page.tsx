@@ -9,6 +9,7 @@ export default function Home() {
   const [message, setMessage] = useState<string>("");
   const [confidence, setConfidence] = useState<number | null>(null);
   const [model, setModel] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const URL = "https://fake-news-predictor-backend-1.onrender.com/";
   // const URL = "http://127.0.0.1:5000";
@@ -26,6 +27,7 @@ export default function Home() {
       return;
     }
 
+    setIsLoading(true);
     try {
       const response = await fetch(`${URL}/predict`, {
         method: "POST",
@@ -54,6 +56,8 @@ export default function Home() {
     } catch (error) {
       setMessage(`Network Error: ${error}`);
       setConfidence(null);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -64,149 +68,130 @@ export default function Home() {
   };
 
   return (
-    <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
-      <h1 className="text-6xl font-bold">Fake News Predictor</h1>
-      <h3 className="mb-6">Combating the spread of misinformation, one article at a time.</h3>
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white p-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-12">
+          <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text mb-4">
+            Fake News Predictor
+          </h1>
+          <h3 className="text-xl text-gray-300">
+            Combating the spread of misinformation, one article at a time.
+          </h3>
+        </div>
 
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column" }}>
-        <input
-          type="url"
-          id="url"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          placeholder="https://theonion.com/rfk-jr-demands-secret-service-protection-after-finding-cheez-it-on-kitchen-floor/"
-          style={{
-            padding: "10px",
-            marginBottom: "10px",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-            color: "black",
-          }}
-          required
-        />
-
-        <div className="flex flex-col items-center gap-6 mt-10">
-          <div className="flex items-center gap-4">
-            <button
-              type="submit"
-              onClick = {() => setModel("cnn")}
-              className="w-40 px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition-colors duration-300"
-            >
-              CNN Model
-            </button>
-
-            <a
-              href="https://towardsdatascience.com/convolutional-neural-networks-explained-9cc5188c4939"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-blue-300"
-            >
-              <IoIosInformationCircle size={20} />
-            </a>
-
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="relative">
+            <input
+              type="url"
+              id="url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="Enter article URL"
+              className="w-full px-6 py-4 bg-gray-800/50 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-300 text-white placeholder-gray-400"
+              required
+            />
           </div>
 
-          <div className="flex items-center gap-4">
-            <button
-              type="submit"
-              onClick = {() => setModel("lstm")}
-              className="w-40 px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition-colors duration-300"
-            >
-              LSTM Model
-            </button>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+            <div className="flex items-center gap-3">
+              <button
+                type="submit"
+                onClick={() => setModel("cnn")}
+                className={`group relative px-8 py-3 rounded-lg transition-all duration-300 shadow-lg 
+                  ${model === "cnn" 
+                    ? "bg-gradient-to-r from-blue-600 to-blue-700 ring-2 ring-blue-400 ring-offset-2 ring-offset-gray-900" 
+                    : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 hover:shadow-blue-500/25"
+                  }`}
+              >
+                CNN Model
+              </button>
+              <a
+                href="https://towardsdatascience.com/convolutional-neural-networks-explained-9cc5188c4939"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-blue-400 transition-colors duration-300"
+              >
+                <IoIosInformationCircle size={24} />
+              </a>
+            </div>
 
-            <a
+            <div className="flex items-center gap-3">
+              <button
+                type="submit"
+                onClick={() => setModel("lstm")}
+                className={`group relative px-8 py-3 rounded-lg transition-all duration-300 shadow-lg 
+                  ${model === "lstm" 
+                    ? "bg-gradient-to-r from-purple-600 to-purple-700 ring-2 ring-purple-400 ring-offset-2 ring-offset-gray-900" 
+                    : "bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 hover:shadow-purple-500/25"
+                  }`}
+              >
+                LSTM Model
+              </button>
+              <a
                 href="https://medium.com/@rebeen.jaff/what-is-lstm-introduction-to-long-short-term-memory-66bd3855b9ce"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-blue-300"
+                className="text-gray-400 hover:text-purple-400 transition-colors duration-300"
               >
-                <IoIosInformationCircle size={20} />
+                <IoIosInformationCircle size={24} />
               </a>
+            </div>
           </div>
-        </div>
 
-          
-      </form>
+          {isLoading && (
+            <div className="flex justify-center mt-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+          )}
+        </form>
 
-      {message && (
-  <div style={{ marginTop: "40px" }}>
 
-<div style={{ textAlign: "center" }}>
-<p
-  style={{
-    color: message.startsWith("Error")
-      ? "blue"
-      : message.includes("FAKE NEWS")
-      ? "#fc0328"
-      : message.includes("REAL NEWS")
-      ? "#03fc4e"
-      : "white",
-  }}
 
-  className="text-4xl "
->
-  {message}
-</p>
+        {message && (
+          <div className="mt-12 bg-gray-800/50 rounded-xl p-8 backdrop-blur-sm border border-gray-700">
+            <div className="text-center">
+              <p
+                className={`text-4xl font-bold mb-6 ${
+                  message.startsWith("Error")
+                    ? "text-blue-400"
+                    : message.includes("FAKE NEWS")
+                    ? "text-red-500"
+                    : message.includes("REAL NEWS")
+                    ? "text-green-500"
+                    : "text-white"
+                }`}
+              >
+                {message}
+              </p>
+            </div>
 
-</div>
-    {confidence !== null && (
-      <div style={{ marginTop: "10px" }}>
-        <p>
-          Confidence: <i>{confidence}%</i>
-        </p>
-        <div
-          style={{
-            height: "20px",
-            backgroundColor: "#ccc",
-            borderRadius: "10px",
-            overflow: "hidden",
-            marginTop: "5px",
-          }}
-        >
-          <div
-            style={{
-              height: "100%",
-              width: `${confidence}%`,
-              backgroundColor: confidence > 50 ? "#4caf50" : "#f44336",
-              transition: "width 0.3s ease",
-            }}
-          ></div>
-        </div>
+            {confidence !== null && (
+              <div className="space-y-4">
+                <p className="text-gray-300">
+                  Confidence: <span className="font-semibold">{confidence}%</span>
+                </p>
+                <div className="h-4 bg-gray-700 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full transition-all duration-500 ease-out ${
+                      confidence > 50 ? "bg-green-500" : "bg-red-500"
+                    }`}
+                    style={{ width: `${confidence}%` }}
+                  ></div>
+                </div>
 
-        <div style={{ textAlign: "center", margin: "20px 0" }}>
-          <button
-            onClick={shareOnTwitter}
-            style={{
-              width: "120px",
-              padding: "10px 15px",
-              backgroundColor: "#1DA1F2",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              cursor: "pointer",
-              fontWeight: "bold",
-              fontSize: "14px",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: "5px",
-              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-              transition: "background-color 0.3s ease, transform 0.2s ease",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#1991DB")}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#1DA1F2")}
-            onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.95)")}
-            onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
-          >
-            Share <CiTwitter size={20} />
-          </button>
-        </div>
-
+                <div className="flex justify-center mt-8">
+                  <button
+                    onClick={shareOnTwitter}
+                    className="flex items-center gap-2 px-6 py-3 bg-[#1DA1F2] rounded-lg hover:bg-[#1991DB] transition-all duration-300 shadow-lg hover:shadow-blue-500/25"
+                  >
+                    Share <CiTwitter size={20} />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
-    )}
-  </div>
-)}
     </div>
   );
 }
